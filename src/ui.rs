@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 
 pub fn show_menu() -> String {
-    println!("\n=== Task Manager ===");
+    println!("\n=== Task Manager (by Saga) ===");
     println!("Choose an action:");
     println!("1. Add Task");
     println!("2. List Tasks");

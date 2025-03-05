@@ -4,6 +4,7 @@ mod ui;
 use tasks::{load_tasks, save_tasks, Task};
 use ui::show_menu;
 use std::io::Write;
+use chrono::NaiveDate;
 
 fn main() {
     let mut tasks = load_tasks();
@@ -21,7 +22,25 @@ fn main() {
                 std::io::stdin().read_line(&mut task_name).unwrap();
                 let task_name = task_name.trim();
 
-                let new_task = Task::new(task_name);
+                print!("Enter the due date (YYYY-MM-DD) or leave empty: ");
+                std::io::stdout().flush().unwrap();
+                
+                let mut due_date_str = String::new();
+                std::io::stdin().read_line(&mut due_date_str).unwrap();
+                let due_date_str = due_date_str.trim();
+
+                let mut new_task = Task::new(task_name);
+
+                if !due_date_str.is_empty() {
+                    match NaiveDate::parse_from_str(due_date_str, "%Y-%m-%d") {
+                        Ok(due_date) => {
+                            new_task.set_due_date(due_date);
+                            println!("Due date set to: {}", due_date_str);
+                        },
+                        Err(_) => println!("Invalid due date format! Please use YYYY-MM-DD."),
+                    }
+                }
+
                 tasks.push(new_task);
                 save_tasks(&tasks);
                 println!("Task added: {}", task_name);
@@ -34,7 +53,8 @@ fn main() {
                 } else {
                     for (index, task) in tasks.iter().enumerate() {
                         let status = if task.completed { "Completed" } else { "Pending" };
-                        println!("{}. {} [{}]", index + 1, task.name, status);
+                        let due_date = task.get_due_date().unwrap_or_else(|| "No due date".to_string());
+                        println!("{}. {} [{}] Due: {}", index + 1, task.name, status, due_date);
                     }
                 }
             }

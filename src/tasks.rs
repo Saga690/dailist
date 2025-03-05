@@ -2,11 +2,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::{self};
 use std::fs::File;
 use std::path::Path;
+use chrono::NaiveDate;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Task {
     pub name: String,
     pub completed: bool,
+    pub due_date: Option<NaiveDate>,
 }
 
 impl Task {
@@ -14,11 +16,22 @@ impl Task {
         Task {
             name: name.to_string(),
             completed: false,
+            due_date: None,
         }
     }
 
     pub fn mark_completed(&mut self) {
         self.completed = true;
+    }
+
+    // Set a due date directly from a NaiveDate
+    pub fn set_due_date(&mut self, due_date: NaiveDate) {
+        self.due_date = Some(due_date);
+    }
+
+    // Getting formatted due date
+    pub fn get_due_date(&self) -> Option<String> {
+        self.due_date.map(|d| d.format("%Y-%m-%d").to_string())
     }
 }
 
@@ -54,5 +67,13 @@ mod tests {
         let mut task = Task::new("Test Task");
         task.mark_completed();
         assert_eq!(task.completed, true);
+    }
+
+    #[test]
+    fn test_set_due_date() {
+        let mut task = Task::new("Test Task");
+        let due_date = NaiveDate::from_ymd_opt(2025, 3, 10).expect("Invalid date");
+        task.set_due_date(due_date);
+        assert_eq!(task.due_date.unwrap(), due_date);
     }
 }
